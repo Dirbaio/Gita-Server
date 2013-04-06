@@ -12,10 +12,10 @@ void error(const char* msg)
 
 int main()
 {
+    srand(time(0));
     while(true)
     {
-
-        int playerCount = 1;
+        int playerCount = 2;
 
         vector<string> keys(playerCount);
         vector<sf::TcpSocket*> sockets (playerCount);
@@ -56,7 +56,19 @@ int main()
                         cout << "Connected player "<<playerConnectedCount << " of " << playerCount <<  "! From "<<client->getRemoteAddress()<<endl;
 
                         if(playerConnectedCount == playerCount)
+                        {
                             cout<<"Starting game!"<<endl;
+                            int mapSize = 2;
+                            int personCount = 300;
+                            int policeCount = 60;
+                            int seed = rand();
+                            for(int i = 0; i < playerCount; i++)
+                            {
+                                sf::Packet start;
+                                start << i << playerCount << mapSize << personCount << policeCount << seed;
+                                sockets[i]->send(start);
+                            }
+                        }
                     }
                 }
                 else
