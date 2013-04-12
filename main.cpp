@@ -1,7 +1,8 @@
 #include <iostream>
 #include <list>
 #include <SFML/Network.hpp>
-#include<sstream>
+#include <sstream>
+#include <queue>
 
 using namespace std;
 
@@ -30,7 +31,7 @@ public:
 };
 
 
-int playerCount = 2;
+int playerCount = 1;
 
 class Game
 {
@@ -38,11 +39,15 @@ public:
     vector<Player> players;
     bool running;
     bool ended;
+    int targetLag;
+    int currentLag;
 
     Game()
     {
         running = false;
         ended = false;
+        currentLag = 0;
+        targetLag = 3;
     }
 
     void sendPlayerCount()
@@ -153,9 +158,16 @@ public:
                             if(players[j].socket != NULL)
                             {
                                 players[j].keysReceived = false;
-                                players[j].socket -> send(keyPacket);
+                                if(targetLag >= currentLag)
+                                    players[j].socket -> send(keyPacket);
+                                if(targetLag > currentLag)
+                                    players[j].socket -> send(keyPacket);
                             }
 
+                        if(targetLag < currentLag)
+                            currentLag--;
+                        if(targetLag > currentLag)
+                            currentLag++;
                     }
                 }
                 else if(res != sf::Socket::NotReady)
