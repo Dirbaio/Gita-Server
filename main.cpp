@@ -31,7 +31,7 @@ class Player
 };
 
 
-int playerCount = 2;
+int playerCount = 3;
 
 class Game
 {
@@ -138,37 +138,13 @@ class Game
 					sf::Socket::Status res = client.receive(packet);
 					if (res == sf::Socket::Done)
 					{
+						cout<<">>"<<i<<endl;
 						string s;
 						packet >> s;
 
 						players[i].keys = s;
 						players[i].keysReceived = true;
 
-						bool allDone = true;
-						for(int j = 0; j < players.size(); j++)
-							if(!players[j].keysReceived && players[j].socket != NULL) allDone = false;
-
-						if(allDone)
-						{
-							sf::Packet keyPacket;
-							for(int j = 0; j < players.size(); j++)
-								keyPacket << players[j].keys;
-
-							for(int j = 0; j < players.size(); j++)
-								if(players[j].socket != NULL)
-								{
-									players[j].keysReceived = false;
-									if(targetLag >= currentLag)
-										players[j].socket -> send(keyPacket);
-									if(targetLag > currentLag)
-										players[j].socket -> send(keyPacket);
-								}
-
-							if(targetLag < currentLag)
-								currentLag--;
-							if(targetLag > currentLag)
-								currentLag++;
-						}
 					}
 					else if(res != sf::Socket::NotReady)
 					{
@@ -188,6 +164,34 @@ class Game
 
 							cout<<"Game ended: all players disconnected."<<endl;
 						}
+					}
+
+
+					bool allDone = true;
+					for(int j = 0; j < players.size(); j++)
+						if(!players[j].keysReceived && players[j].socket != NULL) allDone = false;
+
+					if(allDone)
+					{
+						cout<<"SEND"<<endl;
+						sf::Packet keyPacket;
+						for(int j = 0; j < players.size(); j++)
+							keyPacket << players[j].keys;
+
+						for(int j = 0; j < players.size(); j++)
+							if(players[j].socket != NULL)
+							{
+								players[j].keysReceived = false;
+								if(targetLag >= currentLag)
+									players[j].socket -> send(keyPacket);
+								if(targetLag > currentLag)
+									players[j].socket -> send(keyPacket);
+							}
+
+						if(targetLag < currentLag)
+							currentLag--;
+						if(targetLag > currentLag)
+							currentLag++;
 					}
 				}
 			}
